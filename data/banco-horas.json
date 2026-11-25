@@ -1,0 +1,17 @@
+{
+  "_sobre": "Tabela de lançamentos de banco de horas do 'Senior simulado'. Cada linha é um crédito (+) ou débito (-) em minutos. O serviço lê esta tabela a cada clique e calcula o saldo na hora.",
+  "lancamentos": [
+    { "matricula": "756431", "data": "2026-06-12", "minutos": 120, "motivo": "Hora extra - fechamento de mês" },
+    { "matricula": "756431", "data": "2026-06-26", "minutos": -60, "motivo": "Saída antecipada" },
+    { "matricula": "756431", "data": "2026-07-08", "minutos": 90, "motivo": "Hora extra - treinamento" },
+    { "matricula": "756431", "data": "2026-07-21", "minutos": -120, "motivo": "Consulta médica" },
+    { "matricula": "756431", "data": "2026-08-14", "minutos": 180, "motivo": "Hora extra - inventário" },
+    { "matricula": "756431", "data": "2026-08-29", "minutos": -30, "motivo": "Atraso" },
+    { "matricula": "756431", "data": "2026-09-10", "minutos": 60, "motivo": "Hora extra" },
+    { "matricula": "756431", "data": "2026-09-30", "minutos": -240, "motivo": "Folga compensada" },
+    { "matricula": "756431", "data": "2026-10-15", "minutos": 150, "motivo": "Hora extra - go-live" },
+    { "matricula": "756431", "data": "2026-10-23", "minutos": -45, "motivo": "Atraso" },
+    { "matricula": "756431", "data": "2026-11-05", "minutos": 75, "motivo": "Hora extra" },
+    { "matricula": "756431", "data": "2026-11-18", "minutos": -60, "motivo": "Saída antecipada" }
+  ]
+}

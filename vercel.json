@@ -1,5 +1,8 @@
 {
   "rewrites": [
     { "source": "/sob-demanda/:tipo", "destination": "/api/docs/:tipo" }
-  ]
+  ],
+  "functions": {
+    "api/**/*.js": { "includeFiles": "data/**" }
+  }
 }

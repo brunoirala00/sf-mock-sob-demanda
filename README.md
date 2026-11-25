@@ -12,7 +12,9 @@ clique no link → serviço identifica o usuário → "Senior" gera o PDF na hor
 
 Tipos: `declaracao-vinculo`, `saldo-banco-horas`, `horarios-jornada`.
 
-Os dados são fictícios e determinísticos: o mesmo userId sempre gera a mesma matrícula e os mesmos números.
+Os dados são fictícios. Declaração e horários são determinísticos (o mesmo userId gera sempre os mesmos números).
+
+O **saldo do banco de horas** é calculado a partir da tabela `data/banco-horas.json` (lançamentos por matrícula, em minutos), lida a cada clique. Para simular novos lançamentos no Senior, adicione linhas nessa tabela e faça push: o Vercel publica em cerca de 1 minuto e o próximo clique no SF já traz o saldo novo.
 
 **Só para teste:** o userId vai na URL porque o mock não tem login. No desenho real ele vem do token do IAS e nunca da URL.
 
