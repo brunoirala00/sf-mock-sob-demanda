@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "description": "Mock do serviço de documentos sob demanda (Senior simulado) para teste com o SuccessFactors",
+  "dependencies": {
+    "@neondatabase/serverless": "1.0.2"
+  },
   "scripts": {
-    "dev": "node server.js",
-    "test": "node test.js"
+    "dev": "node server.js"
   }
 }

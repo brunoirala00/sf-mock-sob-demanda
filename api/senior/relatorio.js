@@ -2,7 +2,7 @@
 // GET /api/senior/relatorio?tipo=declaracao-vinculo&userId=xxx
 const { gerar, TIPOS } = require('../../lib/relatorios');
 
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
   const url = new URL(req.url, 'http://local');
   const tipo = url.searchParams.get('tipo');
   const userId = url.searchParams.get('userId');
@@ -11,7 +11,13 @@ module.exports = (req, res) => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     return res.end(JSON.stringify({ erro: 'Informe tipo e userId', tipos: Object.keys(TIPOS) }));
   }
-  const r = gerar(tipo, userId);
+  let r;
+  try { r = await gerar(tipo, userId); }
+  catch (e) {
+    res.statusCode = 502;
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    return res.end('Falha ao consultar o Senior simulado: ' + e.message);
+  }
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.end(JSON.stringify({ tipo, matricula: r.matricula, nomeArquivo: `${tipo}-${r.matricula}.pdf`, pdfBase64: r.pdf.toString('base64') }));

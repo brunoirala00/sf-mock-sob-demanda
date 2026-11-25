@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Senior simulado - Banco de horas</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --tx:#1d2733; --mut:#5b6775; --bd:#dde2e8; --pri:#0a6ed1; --pos:#1a7f37; --neg:#c62828; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--tx); }
+  main { max-width:760px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .aviso { color:var(--mut); font-size:13px; margin:0 0 20px; }
+  .card { background:var(--card); border:1px solid var(--bd); border-radius:10px; padding:16px; margin-bottom:16px; }
+  label { display:block; font-size:12px; color:var(--mut); margin-bottom:4px; }
+  input, select, button { font:inherit; }
+  input, select { width:100%; padding:8px 10px; border:1px solid var(--bd); border-radius:6px; background:#fff; }
+  .linha { display:grid; gap:10px; grid-template-columns: 1fr auto; align-items:end; }
+  .form { display:grid; gap:10px; grid-template-columns: 140px 110px 90px 1fr auto; align-items:end; }
+  @media (max-width:640px) { .form { grid-template-columns: 1fr 1fr; } .form .motivo, .form .acao { grid-column: 1 / -1; } }
+  button { padding:8px 14px; border:0; border-radius:6px; background:var(--pri); color:#fff; cursor:pointer; }
+  button.sec { background:transparent; color:var(--neg); padding:4px 8px; }
+  .resumo { display:flex; gap:24px; flex-wrap:wrap; align-items:baseline; }
+  .saldo { font-size:28px; font-weight:600; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th, td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--bd); }
+  th { font-size:12px; color:var(--mut); font-weight:600; }
+  .pos { color:var(--pos); } .neg { color:var(--neg); }
+  a { color:var(--pri); }
+  .msg { font-size:13px; margin-top:8px; min-height:18px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Senior simulado: banco de horas</h1>
+  <p class="aviso">Ambiente de teste com dados fictícios. Os lançamentos ficam no banco do mock e são lidos na hora em que o PDF é gerado.</p>
+
+  <div class="card">
+    <div class="linha">
+      <div><label for="user">Colaborador (userId do SF)</label><input id="user" placeholder="userId do SF"></div>
+      <button id="carregar">Carregar</button>
+    </div>
+  </div>
+
+  <div class="card" id="painel" hidden>
+    <div class="resumo">
+      <div><label>Matrícula Senior</label><div id="mat"></div></div>
+      <div><label>Saldo atual</label><div class="saldo" id="saldo"></div></div>
+      <div><a id="pdf" target="_blank" rel="noopener">Abrir PDF (o mesmo link do SF)</a></div>
+    </div>
+  </div>
+
+  <div class="card" id="novo" hidden>
+    <div class="form">
+      <div><label for="data">Data</label><input id="data" type="date"></div>
+      <div><label for="sinal">Tipo</label><select id="sinal"><option value="1">Crédito</option><option value="-1">Débito</option></select></div>
+      <div><label for="horas">Horas</label><input id="horas" placeholder="01:30"></div>
+      <div class="motivo"><label for="motivo">Motivo</label><input id="motivo" maxlength="80" placeholder="Hora extra"></div>
+      <div class="acao"><button id="incluir">Incluir</button></div>
+    </div>
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <div class="card" id="lista" hidden>
+    <table>
+      <thead><tr><th>Data</th><th>Horas</th><th>Motivo</th><th></th></tr></thead>
+      <tbody id="linhas"></tbody>
+    </table>
+  </div>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const pad = (n) => String(n).padStart(2, '0');
+const hhmm = (m) => (m < 0 ? '-' : '+') + pad(Math.floor(Math.abs(m) / 60)) + ':' + pad(Math.abs(m) % 60);
+const brData = (d) => d.split('-').reverse().join('/');
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+
+function userId() { return $('user').value.trim(); }
+
+async function carregar() {
+  const u = userId(); if (!u) return;
+  try { history.replaceState(null, '', '?userId=' + encodeURIComponent(u)); } catch {}
+  const r = await fetch('/api/banco-horas?userId=' + encodeURIComponent(u));
+  const j = await r.json();
+  if (!r.ok) { $('msg').textContent = j.erro || 'Erro'; return; }
+  $('painel').hidden = $('novo').hidden = $('lista').hidden = false;
+  $('mat').textContent = j.matricula;
+  $('saldo').textContent = hhmm(j.saldoMinutos).replace('+', '') + ' h';
+  $('pdf').href = '/sob-demanda/saldo-banco-horas?userId=' + encodeURIComponent(u);
+  if (!j.banco) $('msg').textContent = 'Banco não configurado: mostrando só os dados de exemplo (somente leitura).';
+  $('linhas').innerHTML = j.lancamentos.slice().reverse().map((l) =>
+    '<tr><td>' + brData(l.data) + '</td><td class="' + (l.minutos < 0 ? 'neg' : 'pos') + '">' + hhmm(l.minutos) +
+    '</td><td>' + esc(l.motivo) + '</td><td><button class="sec" data-id="' + l.id + '">Excluir</button></td></tr>').join('') ||
+    '<tr><td colspan="4">Nenhum lançamento.</td></tr>';
+}
+
+async function incluir() {
+  const m = /^(\d{1,3}):([0-5]\d)$/.exec($('horas').value.trim());
+  if (!$('data').value || !m || !$('motivo').value.trim()) { $('msg').textContent = 'Preencha data, horas (hh:mm) e motivo.'; return; }
+  const minutos = (Number(m[1]) * 60 + Number(m[2])) * Number($('sinal').value);
+  const r = await fetch('/api/banco-horas', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: userId(), data: $('data').value, minutos, motivo: $('motivo').value.trim() }) });
+  const j = await r.json();
+  $('msg').textContent = r.ok ? 'Lançamento incluído. Clique em "Abrir PDF" ou no link do SF para ver o saldo novo.' : (j.erro || 'Erro');
+  if (r.ok) { $('horas').value = ''; $('motivo').value = ''; carregar(); }
+}
+
+$('linhas').addEventListener('click', async (e) => {
+  const id = e.target.dataset && e.target.dataset.id; if (!id) return;
+  const r = await fetch('/api/banco-horas?userId=' + encodeURIComponent(userId()) + '&id=' + id, { method: 'DELETE' });
+  const j = await r.json();
+  $('msg').textContent = r.ok ? 'Lançamento excluído.' : (j.erro || 'Erro');
+  carregar();
+});
+$('carregar').onclick = carregar;
+$('incluir').onclick = incluir;
+$('user').addEventListener('keydown', (e) => { if (e.key === 'Enter') carregar(); });
+$('data').value = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+const q = new URLSearchParams(location.search).get('userId');
+if (q) { $('user').value = q; carregar(); }
+</script>
+</body>
+</html>

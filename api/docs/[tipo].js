@@ -6,7 +6,7 @@
 // No desenho real, o userId vem do token do IAS e NUNCA da URL.
 const { gerar, TIPOS } = require('../../lib/relatorios');
 
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
   const url = new URL(req.url, 'http://local');
   const tipo = (req.query && req.query.tipo) || url.pathname.split('/').filter(Boolean).pop();
   const userId = url.searchParams.get('userId');
@@ -22,7 +22,13 @@ module.exports = (req, res) => {
     return res.end('Usuário não identificado (no real, viria do login IAS).');
   }
 
-  const r = gerar(tipo, userId);
+  let r;
+  try { r = await gerar(tipo, userId); }
+  catch (e) {
+    res.statusCode = 502;
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    return res.end('Falha ao consultar o Senior simulado: ' + e.message);
+  }
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `inline; filename="${tipo}-${r.matricula}.pdf"`);

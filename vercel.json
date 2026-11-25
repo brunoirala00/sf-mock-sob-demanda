@@ -1,6 +1,7 @@
 {
   "rewrites": [
-    { "source": "/sob-demanda/:tipo", "destination": "/api/docs/:tipo" }
+    { "source": "/sob-demanda/:tipo", "destination": "/api/docs/:tipo" },
+    { "source": "/banco-horas", "destination": "/banco-horas.html" }
   ],
   "functions": {
     "api/**/*.js": { "includeFiles": "data/**" }
