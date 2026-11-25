@@ -34,7 +34,7 @@ A tela de lançamentos não tem login; use só dados fictícios.
 1. No projeto `sf-mock-sob-demanda` do Vercel, abra a aba **Storage** e clique em **Create Database**.
 2. Escolha **Neon (Serverless Postgres)**, plano **Free**, região **São Paulo (sa-east-1)** e crie.
 3. Em **Connect Project**, selecione `sf-mock-sob-demanda`, todos os ambientes, e conecte. O Vercel cria a variável `DATABASE_URL`.
-4. Em **Deployments**, no último deploy, abra o menu `...` e clique em **Redeploy** (variáveis novas só valem em deploy novo).
+4. Faça um novo deploy (Deployments > ... > Redeploy, ou qualquer push no main): variáveis novas só valem em deploy novo.
 
 ## Rodar local
 
